@@ -257,6 +257,17 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     return result
   }
 
+  flatMap<T>(
+    iteratee: (astx: Astx, index: number, parent: Astx) => T | T[]
+  ): T[] {
+    const result: any[] = []
+    let index = 0
+    for (const astx of this) {
+      result.push(iteratee(astx, index++, this))
+    }
+    return result.flat()
+  }
+
   at(index: number): Astx {
     return new Astx(
       this.context,
