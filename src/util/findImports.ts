@@ -9,6 +9,7 @@ import {
   getImported,
   stripImportKind,
 } from './imports'
+import compileMatcher from '../compileMatcher'
 
 export default function findImports(
   astx: Astx,
@@ -36,13 +37,20 @@ export default function findImports(
   const restSpecifier = () =>
     t.importSpecifier(t.identifier('$$$'), t.identifier('$$$'))
 
-  for (const { node } of pattern) {
+  for (const path of pattern) {
+    const { node } = path
     const decl: ImportDeclaration = node as any
+    const sourceMatcher = compileMatcher(path.get('source'), {
+      backend: astx.backend,
+    })
     // filter down to only declarations where the source matches to speed up
     // going through the various patterns for each import specifier in the pattern
+    // const existing = allExisting.filter(
+    //   (a) => (a.node as ImportDeclaration).source.value === decl.source.value
+    // ).matched
     const existing = allExisting.filter(
-      (a) => (a.node as ImportDeclaration).source.value === decl.source.value
-    ).matched
+      (a) => sourceMatcher.match(a.path.get('source'), null) != null
+    )
     if (!existing) return new Astx(astx.context, [])
 
     if (!decl.specifiers?.length) {

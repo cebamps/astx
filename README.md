@@ -56,6 +56,10 @@ Super powerful structural search and replace for JavaScript and TypeScript to au
     - [`FindOptions`](#findoptions)
       - [`FindOptions.where` (`{ [captureName: string]: (path: Astx) => boolean }`)](#findoptionswhere--capturename-string-path-astx--boolean-)
     - [`.find(...).replace(...)` (`void`)](#findreplace-void)
+    - [`.findImports(...)` (`Astx`)](#findimports-astx)
+    - [`.addImports(...)` (`Astx`)](#addimports-astx)
+    - [`.removeImports(...)` (`boolean`)](#removeimports-boolean)
+    - [`.replaceImport(...).with(...)` (`boolean`)](#replaceimportwith-boolean)
     - [`.remove()` (`void`)](#remove-void)
     - [`.matched` (`this | null`)](#matched-this--null)
     - [`.size()` (`number`)](#size-number)
@@ -597,6 +601,79 @@ astx
   .find`$fn()`
   .replace(({ captures: { $fn } }) => `${$fn.name.toUpperCase()}()`)
 ```
+
+### `.findImports(...)` (`Astx`)
+
+A convenience version of `.find()` for finding imports that tolerates extra specifiers,
+matches value imports of the same name if type imports were requested, etc.
+
+For example `` .findImports`import $a from 'a'` `` would match `import A, { b, c } from 'a'`
+or `import { default as a } from 'a'`, capturing `$a`, whereas `` .find`import $a from 'a'` ``
+would not match either of these cases.
+
+The pattern must contain only import statements.
+
+### `.addImports(...)` (`Astx`)
+
+Like `.findImports()`, but adds any imports that were not found. For example given the
+source code:
+
+```ts
+import { foo, type bar as qux } from 'foo'
+import 'g'
+```
+
+And the operation
+
+```ts
+const { $bar } = astx.addImports`
+  import type { bar as $bar } from 'foo'
+  import FooDefault from 'foo'
+  import * as g from 'g'
+`
+```
+
+The output would be
+
+```ts
+import FooDefault, { foo, type bar as qux } from 'foo'
+import * as g from 'g'
+```
+
+With `$bar` capturing the identifier `qux`.
+
+### `.removeImports(...)` (`boolean`)
+
+Takes import statements in the same format as `.findImports()` but removes all given specifiers.
+
+### `.replaceImport(...).with(...)` (`boolean`)
+
+Replaces a single import specifier with another. For example given the input
+
+```ts
+import { Match, Route, Location } from 'react-router-dom'
+import type { History } from 'history'
+```
+
+And operation
+
+```ts
+astx.replaceImport`
+  import { Location } from 'react-router-dom'
+`.with`
+  import type { Location } from 'history'
+`
+```
+
+The output would be
+
+```ts
+import { Match, Route } from 'react-router-dom'
+import type { History, Location } from 'history'
+```
+
+The find and replace patterns must both contain a single import statement
+with a single specifier.
 
 ### `.remove()` (`void`)
 
