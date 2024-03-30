@@ -16,7 +16,7 @@ astxTestcase({
     astx.addImports`
       import c, {type d} from 'c'
       import 'f'
-    `()
+    `
   },
   expected: dedent`
     import a from 'a'

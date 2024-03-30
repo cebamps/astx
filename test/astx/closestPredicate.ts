@@ -20,14 +20,14 @@ astxTestcase({
     }
   `,
   astx: ({ astx }: TransformOptions): void => {
-    const fns = astx.find`useStyles()`().closest(
+    const fns = astx.find`useStyles()`.closest(
       (astx) =>
         astx.node.type === 'FunctionDeclaration' ||
         astx.node.type === 'ArrowFunctionExpression'
     )
-    fns.destruct`function $x($$args) { $$body }`()
-      .replace`function $x($$args, test) { $$body }`()
-    fns.destruct`($$args) => $body`().replace`($$args, test) => $body`()
+    fns.destruct`function $x($$args) { $$body }`
+      .replace`function $x($$args, test) { $$body }`
+    fns.destruct`($$args) => $body`.replace`($$args, test) => $body`
   },
   expected: dedent`
     function foo(props, test) {

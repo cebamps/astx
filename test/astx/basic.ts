@@ -12,14 +12,14 @@ let { GLORM } = process.env
 `
 
 export function astx({ astx, report }: TransformOptions): void {
-  for (const { $v } of astx.find`process.env.$v`()) {
+  for (const { $v } of astx.find`process.env.$v`) {
     report($v.code)
   }
   for (const { $$$v } of [
-    ...astx.find`const /**/ { $$$v } = process.env`(),
-    ...astx.find`({ $$$v } = process.env)`(),
+    ...astx.find`const /**/ { $$$v } = process.env`,
+    ...astx.find`({ $$$v } = process.env)`,
   ]) {
-    for (const { $v } of $$$v.find`({ /**/ $v: $a })`()) {
+    for (const { $v } of $$$v.find`({ /**/ $v: $a })`) {
       report($v.code)
     }
   }

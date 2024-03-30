@@ -9,7 +9,7 @@ astxTestcase({
     import bar from 'bar'
   `,
   astx: ({ astx }: TransformOptions): void => {
-    astx.replaceImport`import { foo as $foo } from 'foo'`().with(
+    astx.replaceImport`import { foo as $foo } from 'foo'`.with(
       ({ $foo }, parse) =>
         parse`import { renamed as ${$foo} } from 'renamed/foo'`
     )

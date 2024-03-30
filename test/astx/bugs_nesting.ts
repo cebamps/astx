@@ -11,7 +11,7 @@ astxTestcase({
   `,
   parsers: ['babel', 'babel/tsx'],
   astx: ({ astx }: TransformOptions): void => {
-    astx.find`t.ref(() => $x)`().replace`z.lazy(() => $x)`()
+    astx.find`t.ref(() => $x)`.replace`z.lazy(() => $x)`
   },
   expected: dedent`
     const validator = z.lazy(() => t.object({

@@ -10,9 +10,10 @@ $requireEnv('TEST3')
 `
 
 export function astx({ astx, report }: TransformOptions): void {
-  const { $requireEnv } =
-    astx.find`import $requireEnv from '@jcoreio/require-env'`()
-  for (const { $v } of astx.find`${$requireEnv}($v)`()) {
+  const {
+    $requireEnv,
+  } = astx.find`import $requireEnv from '@jcoreio/require-env'`
+  for (const { $v } of astx.find`${$requireEnv}($v)`) {
     report($v.code)
   }
 }

@@ -135,7 +135,7 @@ But this is just the beginning; `astx` patterns can be much more complex and pow
 an intuitive [API](#api) you can use:
 
 ```ts
-for (const match of astx.find`rmdir($path, $force)`()) {
+for (const match of astx.find`rmdir($path, $force)`) {
   const { $path, $force } = match
   // do stuff with $path.node, $path.code, etc...
 }
@@ -536,23 +536,23 @@ For example if you do `astx.find('foo($$args)').find('$a + $b')`, the second `fi
 
 You can call `.find` as a method or tagged template literal:
 
-- `` .find`pattern`(options?: FindOptions) ``
+- `` .find`pattern` ``
 - `.find(pattern: string | string[] | Node | Node[] | NodePath | NodePath[] | ((wrapper: Astx) => boolean), options?: FindOptions)`
 
 If you give the pattern as a string, it must be a valid expression or statement(s). Otherwise it should be valid
 AST node(s) you already parsed or constructed.
 You can interpolate strings, AST nodes, arrays of AST nodes, and `Astx` instances in the tagged template literal.
 
-For example you could do `` astx.find`${t.identifier('foo')} + 3`() ``.
+For example you could do `` astx.find`${t.identifier('foo')} + 3` ``.
 
 Or you could match multiple statements by doing
 
 ```ts
-astx.findStatements`
+astx.find`
   const $a = $b;
   $$c;
   const $d = $a + $e;
-`()
+`
 ```
 
 This would match (for example) the statements `const foo = 1; const bar = foo + 5;`, with any number of statements between them.
@@ -582,7 +582,7 @@ Finds and replaces matches for the given pattern within `root`.
 
 There are several different ways you can call `.replace`. You can call `.find` in any way described above.
 
-- `` .find(...).replace`replacement`() ``
+- `` .find(...).replace`replacement` ``
 - `.find(...).replace(replacement: string | string | Node | Node[])`
 - `.find(...).replace(replacement: (match: Astx, parse: ParsePattern) => string)`
 - `.find(...).replace(replacement: (match: Astx, parse: ParsePattern) => Node | Node[])`
@@ -621,7 +621,7 @@ Gets an `Astx` instance focused on the capture(s) with the given `name`.
 For example, you can do:
 
 ```ts
-for (const { $v } of astx.find`process.env.$v`()) {
+for (const { $v } of astx.find`process.env.$v`) {
   report($v.code)
 }
 ```
@@ -631,7 +631,7 @@ for (const { $v } of astx.find`process.env.$v`()) {
 The name of the placeholder this instance represents. For example:
 
 ```ts
-const match = astx.find`function $fn($$params) { $$body }`()
+const match = astx.find`function $fn($$params) { $$body }`
 console.log(match.placeholder) // undefined
 const { $fn, $$params } = match
 console.log($fn.placeholder) // $fn
@@ -775,9 +775,7 @@ See [`FindOptions.where` (`{ [captureName: string]: (path: NodePath<any>) => boo
 
 A code string, AST node, or replace function to replace matches of `exports.find` with.
 
-The function arguments are the same as described in [`.find().replace()`](#findreplace) or
-[`.findStatements().replace()`](#findstatementsreplace), depending on whether `exports.find`
-is multiple statements or not.
+The function arguments are the same as described in [`.find().replace()`](#findreplace-void).
 
 ## `exports.astx` (optional)
 

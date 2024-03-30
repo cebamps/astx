@@ -15,7 +15,7 @@ astxTestcase({
   astx: ({ astx }: TransformOptions): void => {
     const match = astx.addImports`
       import { b as $b } from 'a'
-    `()
+    `
     expect(match.$b.code).to.equal('b')
   },
   expected: dedent`

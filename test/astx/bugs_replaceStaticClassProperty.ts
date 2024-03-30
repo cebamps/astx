@@ -17,9 +17,9 @@ class Connection extends Model<ConnectionAttributes, ConnectionInitAttributes> {
   astx: ({ astx }: TransformOptions): void => {
     for (const {
       $$body,
-    } of astx.find`class $C extends Model<$$A> { $$body }`()) {
-      $$body.find`class X { /**/ static $a: Association.HasMany<$$p> = $Maybe($i)}`()
-        .replace`class X { /**/ declare static $a: any; }`()
+    } of astx.find`class $C extends Model<$$A> { $$body }`) {
+      $$body.find`class X { /**/ static $a: Association.HasMany<$$p> = $Maybe($i)}`
+        .replace`class X { /**/ declare static $a: any; }`
     }
   },
   expected: `

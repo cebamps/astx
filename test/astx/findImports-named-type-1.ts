@@ -9,7 +9,7 @@ astxTestcase({
     import type {foo as bar, baz} from 'foo' 
   `,
   astx: ({ astx, report }: TransformOptions): void => {
-    report(astx.findImports`import { type foo as $f } from 'foo'`().$f.code)
+    report(astx.findImports`import { type foo as $f } from 'foo'`.$f.code)
   },
   expectedReports: ['bar'],
 })

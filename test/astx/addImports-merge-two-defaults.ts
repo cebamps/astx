@@ -10,7 +10,7 @@ astxTestcase({
   astx: ({ astx }: TransformOptions): void => {
     astx.addImports`
       import b from 'a'
-    `()
+    `
   },
   expected: dedent`
     import a, { default as b } from 'a'

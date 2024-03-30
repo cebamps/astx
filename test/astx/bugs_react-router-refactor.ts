@@ -49,12 +49,12 @@ astxTestcase({
     }
 
     const stringOrLocationShapeMatch =
-      astx.find`type T = /**/ string | LocationShape`().matched
+      astx.find`type T = /**/ string | LocationShape`.matched
     if (stringOrLocationShapeMatch) {
-      astx.replaceImport`import { type LocationShape } from 'react-router-dom'`()
-        .with`import type { LocationDescriptor } from 'history'`()
-      astx.addImports`import type { LocationState } from '${'../react-router/LocationState'}'`()
-      stringOrLocationShapeMatch.replace`LocationDescriptor<LocationState>`()
+      astx.replaceImport`import { type LocationShape } from 'react-router-dom'`
+        .with`import type { LocationDescriptor } from 'history'`
+      astx.addImports`import type { LocationState } from '${'../react-router/LocationState'}'`
+      stringOrLocationShapeMatch.replace`LocationDescriptor<LocationState>`
     }
   },
   expected: dedent`

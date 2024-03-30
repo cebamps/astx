@@ -66,12 +66,10 @@ astxTestcase({
     export default SidebarItem
   `,
   astx: ({ astx }: TransformOptions): void => {
-    const styleFn = astx.find`(theme: Theme): $Maybe<$Ret> => $body`()
-    styleFn.$body.destruct`({ $$props })`().replace`({ $$props } as const)`()
-    styleFn.$body.find`return { $$props }`()
-      .replace`return { $$props } as const`()
-
-    styleFn.destruct`($$args): $Ret => $body`().replace`($$args) => $body`()
+    const styleFn = astx.find`(theme: Theme): $Maybe<$Ret> => $body`
+    styleFn.$body.destruct`({ $$props })`.replace`({ $$props } as const)`
+    styleFn.$body.find`return { $$props }`.replace`return { $$props } as const`
+    styleFn.destruct`($$args): $Ret => $body`.replace`($$args) => $body`
   },
   expected: dedent`
     import * as React from 'react'

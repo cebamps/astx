@@ -20,7 +20,7 @@ astxTestcase({
       import x, {type d} from 'a'
       import 'b'
       import {c, c as h, c as e, f} from 'c'
-    `()
+    `
   },
   expected: dedent`
     import x, {a, type d} from 'a'

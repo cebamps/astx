@@ -172,7 +172,7 @@ export class TagNotificationsListener extends React.Component<TagNotificationsLi
 `
 
 export function astx({ astx, statement }: TransformOptions): void {
-  const { $React } = astx.find`import * as $React from 'react'`()
+  const { $React } = astx.find`import * as $React from 'react'`
   if (!$React.size) return
 
   for (const comp of astx.find`
@@ -180,23 +180,22 @@ export function astx({ astx, statement }: TransformOptions): void {
       render(): $Maybe<$Node> { $$render }
       $$$body
     }
-  `()) {
+  `) {
     const { $C, $Props, $$$body, $Node, $$render } = comp
-    comp.find`this.$x`().replace`$x`()
+    comp.find`this.$x`.replace`$x`
 
     const decls: Statement[] = []
-
-    const { $contextType } =
-      $$$body.find`class X { /**/ static contextType = $contextType }`()
+    const {
+      $contextType,
+    } = $$$body.find`class X { /**/ static contextType = $contextType }`
     if ($contextType.size) {
       decls.push(
         statement`const context = ${$React}.useContext(${$contextType})`
       )
     }
-
-    for (const prop of $$$body.find`class X { /**/ $name: $Maybe<$Type> = $value }`()) {
+    for (const prop of $$$body.find`class X { /**/ $name: $Maybe<$Type> = $value }`) {
       const { $name, $Type, $value } = prop
-      const valueFn = $value.find`($$args): $Maybe<$Ret> => $expr`()
+      const valueFn = $value.find`($$args): $Maybe<$Ret> => $expr`
       if (valueFn.size && valueFn.node === $value.node) {
         decls.push(
           $Type.size
@@ -211,15 +210,15 @@ export function astx({ astx, statement }: TransformOptions): void {
         )
       }
     }
-
-    const { $$didMount } =
-      $$$body.find`class X { /**/ componentDidMount(): $Maybe<$> { $$didMount } }`()
+    const {
+      $$didMount,
+    } = $$$body.find`class X { /**/ componentDidMount(): $Maybe<$> { $$didMount } }`
     if ($$didMount.size) {
       decls.push(statement`${$React}.useEffect(() => { ${$$didMount} }, [])`)
     }
-
-    const { $$didUnmount } =
-      $$$body.find`class X { /**/ componentWillUnmount(): $Maybe<$> { $$didUnmount } }`()
+    const {
+      $$didUnmount,
+    } = $$$body.find`class X { /**/ componentWillUnmount(): $Maybe<$> { $$didUnmount } }`
     if ($$didUnmount.size) {
       decls.push(
         statement`${$React}.useEffect(() => () => { ${$$didUnmount} }, [])`
@@ -230,12 +229,12 @@ export function astx({ astx, statement }: TransformOptions): void {
       comp.replace`function ${$C}(props: ${$Props}): ${$Node} {
         ${decls}
         ${$$render}
-      }`()
+      }`
     } else {
       comp.replace`function ${$C}(props: ${$Props}) {
         ${decls}
         ${$$render}
-      }`()
+      }`
     }
   }
 }

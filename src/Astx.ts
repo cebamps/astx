@@ -343,11 +343,10 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
-  private _execPattern<Options, Return>(
+  private _execPattern<Return>(
     name: string,
     exec: (
-      pattern: NodePath<Node, any> | readonly NodePath<Node, any>[],
-      options?: Options
+      pattern: NodePath<Node, any> | readonly NodePath<Node, any>[]
     ) => Return,
     arg0:
       | string
@@ -358,31 +357,26 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): Return | ((options?: Options) => Return) {
+  ): Return {
     const { backend } = this
     const { parsePattern } = backend
     const { NodePath } = backend.t
     try {
-      let pattern: NodePath<Node, any> | readonly NodePath<Node, any>[],
-        options: Options | undefined
+      let pattern: NodePath<Node, any> | readonly NodePath<Node, any>[]
       if (typeof arg0 === 'string') {
         pattern = parsePattern(arg0)
-        options = rest[0]
       } else if (
         Array.isArray(arg0)
           ? arg0[0] instanceof NodePath
           : arg0 instanceof NodePath
       ) {
         pattern = ensureArray(arg0 as NodePath | NodePath[])
-        options = rest[0]
       } else if (isNode(arg0) || isNodeArray(arg0)) {
         pattern = ensureArray(arg0).map((node) => new NodePath(node))
-        options = rest[0]
       } else {
         pattern = parsePattern(arg0 as any, ...rest)
-        return (options?: Options) => exec(pattern, options)
       }
-      return exec(pattern, options)
+      return exec(pattern)
     } catch (error) {
       if (error instanceof Error) {
         CodeFrameError.rethrow(error, {
@@ -394,9 +388,9 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     }
   }
 
-  private _execPatternOrPredicate<Options, Return>(
+  private _execPatternOrPredicate<Return>(
     name: string,
-    exec: (match: CompiledMatcher['match'], options?: Options) => Return,
+    exec: (match: CompiledMatcher['match']) => Return,
     arg0:
       | string
       | Node
@@ -407,11 +401,10 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | TemplateStringsArray
       | FindPredicate,
     ...rest: any[]
-  ): Return | ((options?: Options) => Return) {
+  ): Return {
     const { backend } = this
     if (arg0 instanceof Function) {
       const predicate = arg0
-      const options = rest[0]
       const match = (path: NodePath): MatchResult => {
         const wrapper = new Astx(this.context, [path], {
           withCaptures: this._matches,
@@ -419,7 +412,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
         return predicate(wrapper) ? wrapper.initialMatch || {} : null
       }
       try {
-        return exec(match, options)
+        return exec(match)
       } catch (error) {
         if (error instanceof Error) {
           CodeFrameError.rethrow(error, {
@@ -431,19 +424,15 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     } else {
       return this._execPattern(
         name,
-        (
-          pattern: NodePath<Node, any> | readonly NodePath<Node, any>[],
-          options?: Options
-        ) => {
+        (pattern: NodePath<Node, any> | readonly NodePath<Node, any>[]) => {
           pattern = ensureArray(pattern)
           if (pattern.length !== 1) {
             throw new Error(`must be a single node`)
           }
           const matcher = compileMatcher(pattern[0], {
-            ...options,
             backend,
           })
-          return exec(matcher.match, options)
+          return exec(matcher.match)
         },
         arg0,
         ...rest
@@ -451,10 +440,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     }
   }
 
-  closest(
-    strings: TemplateStringsArray,
-    ...quasis: any[]
-  ): (options?: FindOptions) => Astx
+  closest(strings: TemplateStringsArray, ...quasis: any[]): Astx
   closest(
     pattern:
       | string
@@ -475,7 +461,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | TemplateStringsArray
       | FindPredicate,
     ...rest: any[]
-  ): Astx | ((options?: FindOptions) => Astx) {
+  ): Astx {
     const { context } = this
     return this._execPatternOrPredicate(
       'closest',
@@ -500,10 +486,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
-  destruct(
-    strings: TemplateStringsArray,
-    ...quasis: any[]
-  ): (options?: FindOptions) => Astx
+  destruct(strings: TemplateStringsArray, ...quasis: any[]): Astx
   destruct(
     pattern:
       | string
@@ -524,7 +507,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | TemplateStringsArray
       | FindPredicate,
     ...rest: any[]
-  ): Astx | ((options?: FindOptions) => Astx) {
+  ): Astx {
     const { context } = this
     return this._execPatternOrPredicate(
       'destruct',
@@ -541,10 +524,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
-  find(
-    strings: string[] | TemplateStringsArray,
-    ...quasis: any[]
-  ): (options?: FindOptions) => Astx
+  find(strings: string[] | TemplateStringsArray, ...quasis: any[]): Astx
   find(
     pattern:
       | string
@@ -566,7 +546,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | TemplateStringsArray
       | FindPredicate,
     ...rest: any[]
-  ): Astx | ((options?: FindOptions) => Astx) {
+  ): Astx {
     const { context, backend } = this
     if (arg0 instanceof Function) {
       const predicate = arg0
@@ -600,10 +580,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
-  replace(
-    strings: string[] | TemplateStringsArray,
-    ...quasis: any[]
-  ): () => void
+  replace(strings: string[] | TemplateStringsArray, ...quasis: any[]): void
   replace(replacement: string | Node | Node[] | GetReplacement): void
   replace(
     arg0:
@@ -614,7 +591,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...quasis: any[]
-  ): void | (() => void) {
+  ): void {
     const { backend } = this
     const { parsePatternToNodes } = backend
     try {
@@ -643,7 +620,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
         }
       } else {
         const finalPaths = parsePatternToNodes(arg0, ...quasis)
-        return () => this.replace(finalPaths)
+        this.replace(finalPaths)
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -660,10 +637,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     this.replace([])
   }
 
-  addImports(
-    strings: string[] | TemplateStringsArray,
-    ...quasis: any[]
-  ): () => Astx
+  addImports(strings: string[] | TemplateStringsArray, ...quasis: any[]): Astx
   addImports(
     pattern: string | Node | Node[] | NodePath<any> | NodePath<any>[]
   ): Astx
@@ -677,7 +651,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): Astx | (() => Astx) {
+  ): Astx {
     return this._execPattern(
       'addImports',
       (pattern: NodePath<Node, any> | readonly NodePath<Node, any>[]): Astx =>
@@ -687,10 +661,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
-  findImports(
-    strings: string[] | TemplateStringsArray,
-    ...quasis: any[]
-  ): () => Astx
+  findImports(strings: string[] | TemplateStringsArray, ...quasis: any[]): Astx
   findImports(
     pattern: string | Node | Node[] | NodePath<any> | NodePath<any>[]
   ): Astx
@@ -704,7 +675,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): Astx | (() => Astx) {
+  ): Astx {
     return this._execPattern(
       'findImports',
       (pattern: NodePath<Node, any> | readonly NodePath<Node, any>[]): Astx =>
@@ -717,7 +688,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
   removeImports(
     strings: string[] | TemplateStringsArray,
     ...quasis: any[]
-  ): () => boolean
+  ): boolean
   removeImports(
     pattern: string | Node | Node[] | NodePath<any> | NodePath<any>[]
   ): boolean
@@ -731,7 +702,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): boolean | (() => boolean) {
+  ): boolean {
     return this._execPattern(
       'removeImports',
       (
@@ -746,7 +717,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
   replaceImport(
     strings: string[] | TemplateStringsArray,
     ...quasis: any[]
-  ): () => ImportReplacer
+  ): ImportReplacer
   replaceImport(
     pattern: string | Node | Node[] | NodePath<any> | NodePath<any>[]
   ): ImportReplacer
@@ -760,7 +731,7 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): ImportReplacer | (() => ImportReplacer) {
+  ): ImportReplacer {
     return this._execPattern(
       'replaceImport',
       (
@@ -795,10 +766,7 @@ class ImportReplacer {
     public decl: ImportDeclaration
   ) {}
 
-  with(
-    strings: string[] | TemplateStringsArray,
-    ...quasis: any[]
-  ): () => boolean
+  with(strings: string[] | TemplateStringsArray, ...quasis: any[]): boolean
   with(
     pattern:
       | string
@@ -819,7 +787,7 @@ class ImportReplacer {
       | string[]
       | TemplateStringsArray,
     ...rest: any[]
-  ): boolean | (() => boolean) {
+  ): boolean {
     const { backend } = this.astx
     const { parsePatternToNodes } = backend
 
@@ -864,7 +832,7 @@ class ImportReplacer {
         return doReplace(arg0)
       } else {
         const rawReplacement = parsePatternToNodes(arg0 as any, ...rest)
-        return () => doReplace(rawReplacement)
+        return doReplace(rawReplacement)
       }
     } catch (error) {
       if (error instanceof Error) {

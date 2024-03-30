@@ -19,7 +19,7 @@ astxTestcase({
     const match = astx.addImports`
       import { a as $a } from 'a'
       import type { b as $b } from 'b'
-    `()
+    `
     expect(match.$a.code).to.equal('a')
     expect(match.$b.code).to.equal('b')
   },

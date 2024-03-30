@@ -7,7 +7,7 @@ import { fromPairs } from 'lodash'
 `
 
 export function astx({ astx, statement }: TransformOptions): void {
-  astx.find`import { $$imports } from 'lodash'`().replace(({ $$imports }) =>
+  astx.find`import { $$imports } from 'lodash'`.replace(({ $$imports }) =>
     $$imports.map(
       (imp) => statement`import ${imp.code} from 'lodash/${imp.code}'`
     )

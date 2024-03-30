@@ -7,7 +7,7 @@ astxTestcase({
     const x = [1, 2, 3, 4]
   `,
   astx: ({ astx }: TransformOptions): void => {
-    astx.find`[1, $$b, 4]`().$$b.remove()
+    astx.find`[1, $$b, 4]`.$$b.remove()
   },
   expected: `
     const x = [1, 4];
