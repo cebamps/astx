@@ -866,6 +866,7 @@ A function to perform an arbitrary transform using the `Astx` API. It gets calle
 - `statement` - tagged template literal for parsing code as a statement
 - `statements` - tagged template literal for parsing code as an array of statements
 - `report` (`(message: unknown) => void`)
+- `mark` (`(...matches: Astx[]) => void`) - marks the given matches to be displayed in the matches list of vscode-astx, etc
 
 Unlike `jscodeshift`, your transform function can be async, and it doesn't have to return the transformed code,
 but you can return a `string`. You can also return `null` to

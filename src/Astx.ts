@@ -32,6 +32,10 @@ export type TransformOptions = {
   /** The source code of the current file. */
   source: string
   astx: Astx
+  /**
+   * Marks the given matches to be displayed in the matches list of vscode-astx etc.
+   */
+  mark(...matches: (Match | Match[] | Astx | Astx[])[]): void
   expression(strings: TemplateStringsArray, ...quasis: any[]): Expression
   statement(strings: TemplateStringsArray, ...quasis: any[]): Statement
   statements(strings: TemplateStringsArray, ...quasis: any[]): Statement[]

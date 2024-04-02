@@ -102,18 +102,30 @@ export default async function runTransformOnFile({
     let transformed
     const reports: unknown[] = []
 
-    let matches: readonly Match[] | undefined
+    const matches: Match[] = []
+
+    const mark = (...args: (Match | Match[] | Astx | Astx[])[]) => {
+      for (const arg of args) {
+        for (const elem of Array.isArray(arg) ? arg : [arg]) {
+          if (elem instanceof Astx) {
+            for (const match of elem.matches) matches.push(match)
+          } else {
+            matches.push(elem)
+          }
+        }
+      }
+    }
 
     let transformFn = transform.astx
 
     const { find, replace } = transform
     if (typeof transformFn !== 'function' && find) {
-      transformFn = ({ astx }: TransformOptions): any => {
+      transformFn = ({ astx, mark }: TransformOptions): any => {
         const result = astx.find(find as string | Node | Node[], {
           where: transform.where,
         })
         if (replace) result.replace(replace)
-        matches = result.matches
+        mark(result)
         if (!result.size) return null
       }
     }
@@ -134,10 +146,9 @@ export default async function runTransformOnFile({
             backend,
           })
         : undefined
-      const options = {
+      const options: TransformOptions = {
         source,
         file,
-        root,
         t: backend.t,
         report: (msg: unknown) => {
           if (msg instanceof Astx && !msg.size) return
@@ -146,6 +157,7 @@ export default async function runTransformOnFile({
         },
         ...backend.template,
         astx: new Astx({ backend, simpleReplacements }, [root]),
+        mark,
       }
       const [_result, prettier] = await Promise.all([
         transformFn(options),
@@ -195,7 +207,7 @@ export default async function runTransformOnFile({
       source,
       transformed,
       reports,
-      matches,
+      matches: matches.length ? matches : undefined,
       backend,
     }
   } catch (error) {
