@@ -241,6 +241,26 @@ export default class Astx extends ExtendableProxy implements Iterable<Astx> {
     )
   }
 
+  some(
+    iteratee: (astx: Astx, index: number, parent: Astx) => boolean
+  ): boolean {
+    let index = 0
+    for (const astx of this) {
+      if (iteratee(astx, index++, this)) return true
+    }
+    return false
+  }
+
+  every(
+    iteratee: (astx: Astx, index: number, parent: Astx) => boolean
+  ): boolean {
+    let index = 0
+    for (const astx of this) {
+      if (!iteratee(astx, index++, this)) return false
+    }
+    return true
+  }
+
   filter(iteratee: (astx: Astx, index: number, parent: Astx) => boolean): Astx {
     const filtered = []
     let index = 0

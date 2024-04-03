@@ -74,6 +74,8 @@ Super powerful structural search and replace for JavaScript and TypeScript to au
     - [`.match` (`Match`)](#match-match)
     - [`.paths` (`NodePath[]`)](#paths-nodepath)
     - [`.nodes` (`Node[]`)](#nodes-node)
+    - [`.some(predicate)` (`boolean`)](#somepredicate-boolean)
+    - [`.every(predicate)` (`boolean`)](#everypredicate-boolean)
     - [`.filter(iteratee)` (`Astx`)](#filteriteratee-astx)
     - [`.map<T>(iteratee)` (`T[]`)](#maptiteratee-t)
     - [`.at(index)` (`Astx`)](#atindex-astx)
@@ -756,6 +758,18 @@ the paths of nodes that matched the search pattern.
 Returns the nodes that `.find()` and `.closest()` will search within.
 If this instance was returned by `.find()` or `.closest()`, these are
 the nodes that matched the search pattern.
+
+### `.some(predicate)` (`boolean`)
+
+Returns `false` unless `predicate` returns truthy for at least one match.
+
+`iteratee` is function that will be called with `match: Astx, index: number, parent: Astx` and returns `true` or `false`.
+
+### `.every(predicate)` (`boolean`)
+
+Returns `true` unelss `predicate` returns falsy for at least one match.
+
+`iteratee` is function that will be called with `match: Astx, index: number, parent: Astx` and returns `true` or `false`.
 
 ### `.filter(iteratee)` (`Astx`)
 
