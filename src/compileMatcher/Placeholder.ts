@@ -151,26 +151,27 @@ export default function compilePlaceholderMatcher(
   )
 }
 
+function getString(node: Node): string | undefined {
+  if (node.type === 'StringLiteral') return node.value
+  if (node.type === 'TemplateLiteral' && node.quasis.length === 1)
+    return node.quasis[0].value.cooked ?? node.quasis[0].value.raw
+  return undefined
+}
+
 export function compileStringPlaceholderMatcher<N extends Node>(
   pattern: NodePath<N>,
-  getString: (node: N) => string | null,
-  compileOptions: CompileOptions,
-  otherOptions?: {
-    nodeType?: NodeType | NodeType[]
-  }
+  compileOptions: CompileOptions
 ): CompiledMatcher | void {
   const { debug } = compileOptions
   const string = getString(pattern.value)
   if (!string) return
   const placeholder = getPlaceholder(string)
-  const nodeType = otherOptions?.nodeType
   if (placeholder) {
     return {
       pattern,
       placeholder,
-      nodeType,
+      nodeType: ['StringLiteral', 'TemplateLiteral'],
       match: (path: NodePath, matchSoFar: MatchResult): MatchResult => {
-        if (path.value?.type !== pattern.value.type) return null
         debug('String Placeholder', placeholder)
         const string = getString((path as NodePath<N>).value)
         if (!string) return null

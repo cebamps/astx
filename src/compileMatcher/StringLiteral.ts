@@ -10,27 +10,38 @@ export default function matchStringLiteral(
   compileOptions: CompileOptions
 ): CompiledMatcher {
   const pattern: StringLiteral = path.value
-  const n = compileOptions.backend.t.namedTypes
   const placeholderMatcher = compileStringPlaceholderMatcher(
     path,
-    (pattern) => pattern.value,
-    compileOptions,
-    { nodeType: 'StringLiteral' }
+    compileOptions
   )
 
   if (placeholderMatcher) return placeholderMatcher
 
   pattern.value = unescapeIdentifier(pattern.value)
 
+  return createStringLiteralMatcher(path, pattern.value, compileOptions)
+}
+
+export function createStringLiteralMatcher(
+  path: NodePath,
+  value: string,
+  compileOptions: CompileOptions
+): CompiledMatcher {
+  const n = compileOptions.backend.t.namedTypes
   return convertPredicateMatcher(
     path,
     {
       match: (path: NodePath): boolean => {
         const { value: node } = path
 
-        return n.StringLiteral.check(node) && pattern.value === node.value
+        return (
+          (n.StringLiteral.check(node) && value === node.value) ||
+          (n.TemplateLiteral.check(node) &&
+            node.quasis.length === 1 &&
+            value === (node.quasis[0].value.cooked ?? node.quasis[0].value.raw))
+        )
       },
-      nodeType: 'StringLiteral',
+      nodeType: ['StringLiteral', 'TemplateLiteral'],
     },
     compileOptions
   )

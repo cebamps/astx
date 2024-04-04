@@ -4,6 +4,7 @@ import {
   compileStringPlaceholderMatcher,
   unescapeIdentifier,
 } from './Placeholder'
+import { createStringLiteralMatcher } from './StringLiteral'
 
 function generateValue(cooked: string): { raw: string; cooked: string } {
   return { raw: cooked.replace(/\\|`|\${/g, '\\$&'), cooked }
@@ -17,10 +18,7 @@ export default function matchTemplateLiteral(
 
   const placeholderMatcher = compileStringPlaceholderMatcher(
     path,
-    (node: TemplateLiteral) =>
-      node.quasis.length === 1 ? node.quasis[0].value.cooked ?? null : null,
-    compileOptions,
-    { nodeType: 'TemplateLiteral' }
+    compileOptions
   )
 
   if (placeholderMatcher) return placeholderMatcher
@@ -33,5 +31,10 @@ export default function matchTemplateLiteral(
         quasi.value = generateValue(unescaped)
       }
     }
+    return createStringLiteralMatcher(
+      path,
+      quasi.value.cooked ?? quasi.value.raw,
+      compileOptions
+    )
   }
 }
