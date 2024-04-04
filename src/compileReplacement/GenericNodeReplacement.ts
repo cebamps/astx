@@ -5,6 +5,7 @@ import compileReplacement, {
   ReplaceableMatch,
 } from './index'
 import indentDebug from '../compileMatcher/indentDebug'
+import transferComments from '../util/transferComments'
 
 export default function compileGenericNodeReplacement(
   path: NodePath,
@@ -52,6 +53,12 @@ export default function compileGenericNodeReplacement(
       for (const [key, value] of propertyValues) {
         if (value !== undefined) result[key] = value
       }
+
+      transferComments(pattern, result, {
+        leading: true,
+        trailing: true,
+        clone: true,
+      })
 
       return result
     },

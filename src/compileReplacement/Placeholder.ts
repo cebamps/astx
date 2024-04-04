@@ -13,6 +13,7 @@ import {
 } from '../compileMatcher/Placeholder'
 import createReplacementConverter, { bulkConvert } from '../convertReplacement'
 import cloneNode from '../util/cloneNode'
+import transferComments from '../util/transferComments'
 export { unescapeIdentifier }
 
 export function compileArrayPlaceholderReplacement(
@@ -25,18 +26,25 @@ export function compileArrayPlaceholderReplacement(
     getArrayPlaceholder(identifier) || getRestPlaceholder(identifier)
   if (arrayPlaceholder && isCapturePlaceholder(arrayPlaceholder)) {
     const convertReplacement = createReplacementConverter(pattern)
+
+    const baseGenerate = (match: ReplaceableMatch): Node | Node[] => {
+      const captures = match.arrayCaptures?.[arrayPlaceholder]
+      if (captures) {
+        return [
+          ...bulkConvert(
+            captures.map((c) => cloneNode(c)),
+            convertReplacement
+          ),
+        ]
+      }
+      return [...bulkConvert(cloneNode(pattern.value), convertReplacement)]
+    }
+
     return {
       generate: (match: ReplaceableMatch): Node | Node[] => {
-        const captures = match.arrayCaptures?.[arrayPlaceholder]
-        if (captures) {
-          return [
-            ...bulkConvert(
-              captures.map((c) => cloneNode(c)),
-              convertReplacement
-            ),
-          ]
-        }
-        return [...bulkConvert(cloneNode(pattern.value), convertReplacement)]
+        const result = baseGenerate(match)
+        transferComments(pattern.node, result)
+        return result
       },
     }
   }
@@ -50,16 +58,22 @@ export default function compilePlaceholderReplacement(
   const placeholder = getPlaceholder(identifier)
   if (placeholder && isCapturePlaceholder(placeholder)) {
     const convertReplacement = createReplacementConverter(pattern)
+    const baseGenerate = (match: ReplaceableMatch): Node | Node[] => {
+      const capture = match.captures?.[placeholder]
+      if (capture) {
+        const clone = cloneNode(capture)
+        const astx = getAstxMatchInfo(capture)
+        if (astx?.subcapture) return convertReplacement(astx.subcapture)
+        return convertReplacement(clone)
+      }
+      return convertReplacement(cloneNode(pattern.value))
+    }
+
     return {
       generate: (match: ReplaceableMatch): Node | Node[] => {
-        const capture = match.captures?.[placeholder]
-        if (capture) {
-          const clone = cloneNode(capture)
-          const astx = getAstxMatchInfo(capture)
-          if (astx?.subcapture) return convertReplacement(astx.subcapture)
-          return convertReplacement(clone)
-        }
-        return convertReplacement(cloneNode(pattern.value))
+        const result = baseGenerate(match)
+        transferComments(pattern.node, result)
+        return result
       },
     }
   }

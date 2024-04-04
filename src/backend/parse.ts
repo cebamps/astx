@@ -2,6 +2,7 @@ import { Backend } from './Backend'
 import { NodePath, Expression, Statement, Node, Comment } from '../types'
 import ensureArray from '../util/ensureArray'
 import forEachNode from '../util/forEachNode'
+import transferComments from '../util/transferComments'
 
 function parse0(
   backend: Backend,
@@ -14,7 +15,11 @@ function parse0(
       return backend.template.expression(strings, ...quasis)
     if (result.length > 1) return result
     const node = result[0]
-    return node.type === 'ExpressionStatement' ? node.expression : node
+    if (node.type === 'ExpressionStatement') {
+      transferComments(node, node.expression, { leading: true, trailing: true })
+      return node.expression
+    }
+    return node
   } catch (error) {
     // fallthrough
   }

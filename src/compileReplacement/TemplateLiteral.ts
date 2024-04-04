@@ -4,6 +4,7 @@ import { CompiledReplacement, ReplaceableMatch } from './'
 import { unescapeIdentifier } from './Placeholder'
 import cloneNode from '../util/cloneNode'
 import * as t from '@babel/types'
+import transferComments from '../util/transferComments'
 
 function generateValue(cooked: string): { raw: string; cooked: string } {
   return { raw: cooked.replace(/\\|`|\${/g, '\\$&'), cooked }
@@ -21,12 +22,14 @@ export default function compileTemplateLiteralReplacement(
         return {
           generate: (match: ReplaceableMatch): TemplateLiteral => {
             const captured = match.stringCaptures?.[placeholder]
-            return captured
+            const result = captured
               ? t.templateLiteral(
                   [t.templateElement(generateValue(captured), true)],
                   []
                 )
               : cloneNode(pattern)
+            transferComments(pattern, result)
+            return result
           },
         }
       }

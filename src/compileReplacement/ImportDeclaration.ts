@@ -5,6 +5,7 @@ import {
   ReplaceableMatch,
 } from '.'
 import compileGenericNodeReplacement from './GenericNodeReplacement'
+import transferComments from '../util/transferComments'
 
 export default function compileImportDeclarationReplacement(
   path: NodePath<ImportDeclaration, ImportDeclaration>,
@@ -27,6 +28,7 @@ export default function compileImportDeclarationReplacement(
           )
         }
       }
+      transferComments(path.node, result)
       return result
     },
   }

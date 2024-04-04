@@ -4,6 +4,7 @@ import { CompiledReplacement, ReplaceableMatch } from './'
 import { unescapeIdentifier } from './Placeholder'
 import cloneNode from '../util/cloneNode'
 import * as t from '@babel/types'
+import transferComments from '../util/transferComments'
 
 export default function compileStringLiteralReplacement(
   path: NodePath<StringLiteral>
@@ -14,7 +15,9 @@ export default function compileStringLiteralReplacement(
     return {
       generate: (match: ReplaceableMatch): StringLiteral => {
         const captured = match.stringCaptures?.[placeholder]
-        return captured ? t.stringLiteral(captured) : cloneNode(pattern)
+        const result = captured ? t.stringLiteral(captured) : cloneNode(pattern)
+        transferComments(pattern, result)
+        return result
       },
     }
   }
