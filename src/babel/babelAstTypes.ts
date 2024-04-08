@@ -6,7 +6,6 @@ import lodash from 'lodash'
 const { memoize, omit, mapValues } = lodash
 import fork from 'ast-types/fork'
 import { Fork } from 'ast-types/types'
-import nodePathPlugin from 'ast-types/lib/node-path'
 
 const babelAstTypes: (t?: typeof defaultTypes) => ReturnType<typeof fork> =
   memoize((t: typeof defaultTypes = defaultTypes): ReturnType<typeof fork> => {
@@ -14,8 +13,6 @@ const babelAstTypes: (t?: typeof defaultTypes) => ReturnType<typeof fork> =
       const types = fork.use(typesPlugin)
       const { builtInTypes, Type } = types
       const { def, or } = Type
-
-      fork.use(nodePathPlugin)
 
       def('Node').field('type', builtInTypes.string)
       def('Comment')
