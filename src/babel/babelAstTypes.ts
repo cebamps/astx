@@ -14,6 +14,11 @@ const babelAstTypes: (t?: typeof defaultTypes) => ReturnType<typeof fork> =
       const { builtInTypes, Type } = types
       const { def, or } = Type
 
+      // Babel's Identifier is PatternLike, but ast-types's scopePlugin depends
+      // on it being Pattern. This tweak fixes that, at the cost of departing a
+      // little from the Babel type hierarchy.
+      def('Identifier').bases('Pattern');
+
       def('Node').field('type', builtInTypes.string)
       def('Comment')
         .field('type', builtInTypes.string)
